@@ -1,16 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec  1 13:19:46 2023
-
-@author: kevin.p.haughn
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Spyder Editor
-
-This is a temporary script file.
-"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,7 +15,7 @@ from matplotlib.lines import Line2D
 def run(load_data = False):
     if load_data:
         load_and_save_data()
-    
+ 
     Base_df = pd.read_csv('Base_wing_data_full_set_vel_adjX.csv',sep = ',',
                               usecols=[0,1,2,3,4,8,9,10])
     Base_df['CD'] *= -1
@@ -115,10 +102,23 @@ def run(load_data = False):
                                   ignore_index=True)
     
     coeff_df['LD']=coeff_df['CL']/coeff_df['CD']
+    coeff_df['vel']=coeff_df['rpm']*0.055+0.525
     
+    coeff_grouped = coeff_df.groupby(['rpm','config'])
     
+    figCL = plt.figure(figsize=(5,3), dpi=300)
+    clax=sns.boxplot(coeff_df,x ='CL', y='config', hue='vel')
+    sns.move_legend(clax, "upper left", bbox_to_anchor=(1, 1))
+    figCD = plt.figure(figsize=(5,3), dpi=300)
+    sns.boxplot(coeff_df,x ='CD', y='config', hue='vel', legend=False)
+  
+    sns.boxplot(coeff_df.loc[coeff_df['rpm']==200],x ='CL', y='config')
+    sns.boxplot(coeff_df.loc[coeff_df['rpm']==300],x ='CL', y='config')
+    sns.boxplot(coeff_df.loc[coeff_df['rpm']==100],x ='CD', y='config')
+    sns.boxplot(coeff_df.loc[coeff_df['rpm']==200],x ='CD', y='config')
+    sns.boxplot(coeff_df.loc[coeff_df['rpm']==300],x ='CD', y='config')
     
-    #coeff_df = coeff_df.loc[coeff_df['direction']=='NP']
+    coeff_df = coeff_df.loc[coeff_df['direction']=='NP']
     
     print(coeff_df.head())
     CL_df = combine_iters_CL(coeff_df)
@@ -126,7 +126,10 @@ def run(load_data = False):
     LD_df = combine_iters_LD(coeff_df)
     Cm_df = combine_iters_Cm(coeff_df)
     
-    
+    CL_df.to_csv('CL_condensed_data.csv',sep = ',', index=False)
+    CD_df.to_csv('CD_condensed_data.csv',sep = ',', index=False)
+    LD_df.to_csv('LD_condensed_data.csv',sep = ',', index=False)
+    Cm_df.to_csv('Cm_condensed_data.csv',sep = ',', index=False)
     ## Static Plots
     b_color = '#221F20'
     p_color = '#D5D5D7'
